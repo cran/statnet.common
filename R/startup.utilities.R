@@ -1,3 +1,12 @@
+#  File R/startup.utilities.R in package statnet.common, part of the Statnet suite
+#  of packages for network analysis, http://statnet.org .
+#
+#  This software is distributed under the GPL-3 license.  It is free,
+#  open source, and has the attribution requirements (GPL Section 7) at
+#  http://statnet.org/attribution
+#
+#  Copyright 2003-2013 Statnet Commons
+#######################################################################
 statnetStartupMessage <- function(pkgname, friends, nofriends){
   INST_MAP <- list(washington.edu="University of Washington",
                    uw.edu="University of Washington",
@@ -5,7 +14,8 @@ statnetStartupMessage <- function(pkgname, friends, nofriends){
                    uci.edu="University of California -- Irvine",
                    ucla.edu="University of California -- Los Angeles",
                    nyu.edu="New York University",
-                   murdoch.edu.au="Murdoch University"
+                   murdoch.edu.au="Murdoch University",
+                   uow.edu.au="University of Wollongong"
                    ) 
 
   # Note that all options are ignored at this time, and the "wall of
