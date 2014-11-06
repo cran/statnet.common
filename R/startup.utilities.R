@@ -1,12 +1,19 @@
-#  File R/startup.utilities.R in package statnet.common, part of the Statnet suite
-#  of packages for network analysis, http://statnet.org .
-#
-#  This software is distributed under the GPL-3 license.  It is free,
-#  open source, and has the attribution requirements (GPL Section 7) at
-#  http://statnet.org/attribution
-#
-#  Copyright 2003-2013 Statnet Commons
-#######################################################################
+## .who.loaded.me <- function(){
+##   top.call <- sys.calls()[[1]] # Grab the top-level call.
+##   top.fn <- as.character(top.call[[1]])
+  
+##   if(length(top.fn)!=1 || !(top.fn %in% c("library","require"))) return(NULL)
+
+##   top.call <- match.call(get(as.character(top.call[[1]]),baseenv(),mode="function"),top.call) # Expand the arguments.
+##   top.call <- as.list(top.call) # Turn the call into a list.
+  
+##   top.pkg <- top.call$package
+  
+##   if(!NVL(top.call$character.only,FALSE))
+##     as.character(top.pkg)
+##   else top.pkg
+## }
+
 statnetStartupMessage <- function(pkgname, friends, nofriends){
   INST_MAP <- list(washington.edu="University of Washington",
                    uw.edu="University of Washington",
@@ -56,3 +63,37 @@ statnetStartupMessage <- function(pkgname, friends, nofriends){
           'For license and citation information see statnet.org/attribution\n',
           'or type citation("',desc$Package,'").\n', sep="")
 }
+
+
+## statnetStartupMessage <- function(pkgname, quiet.if.dep=FALSE){
+##   library(utils)
+##   INST_MAP <- list(washington.edu="UW",
+##                    uw.edu="UW",
+##                    psu.edu="PSU",
+##                    uci.edu="UCI",
+##                    ucla.edu="UCLA",
+##                    nyu.edu="NYU") 
+
+##   if(quiet.if.dep){
+##     top.pkg <- .who.loaded.me()
+##     if(is.null(top.pkg) || top.pkg!=pkgname) return(NULL)
+##   }
+  
+  
+##   desc <- packageDescription(pkgname)
+##   pns <- eval(parse(text=desc$`Authors@R`))
+##   pnnames <- format(pns, include=c("given","family"))
+##   pninsts <- sapply(pns, function(pn) NVL(INST_MAP[[gsub(".*?([^.@]+\\.[^.]{2,4})$","\\1",NVL(pn$email,""))]],""))
+
+##   authors <- sapply(pns, function(pn) "aut" %in% pn$role)
+##   autlines <- ifelse(pninsts[authors]=="", pnnames[authors], paste(pnnames[authors]," (",pninsts[authors],")",sep=""))
+##   autline <- paste.and(autlines)
+##   ctblines <- pnnames[!authors]
+##   ctbline <- paste.and(ctblines)
+
+##   mystrwrap <- function(...) paste(strwrap(...),collapse="\n")
+
+##   m <- mystrwrap(paste(desc$Package, ' ', desc$Version, " by ", autline, if(length(ctblines)) paste(", with contributions from ", ctbline) else "", ".", sep=""))
+##   paste('', m,mystrwrap(paste('Part of the Statnet suite (statnet.org).  For citation information, type citation("',desc$Package,'").',sep="")),collapse="\n",sep="\n")
+
+## }
