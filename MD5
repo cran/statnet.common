@@ -1,10 +1,11 @@
-b578a3b2f501d15ce67f69dfed5dff18 *DESCRIPTION
+c14083a00ca171b598cd95b416cc80b1 *DESCRIPTION
 5eea07b5771ec9d953b4eebb786d150d *LICENSE
-b956b5b8b5b060a89aad4c824ed0a188 *NAMESPACE
-b034cb152e6f7f3ce136bef541635b88 *NEWS
+6ccd562d5ec6fb3cb30c6db2f2a93bfa *NAMESPACE
+844fda6f209f2bc6cbdfac14406c73d8 *NEWS
 d52e44f41dfcf4f88f53422040e4ec3e *R/cite.utilities.R
 3ee0fd4cd00d18d9dce586cfe7671b14 *R/control.utilities.R
-8645ce27294bf379f5c92163f5a481a5 *R/misc.utilities.R
+bdd05b3e0c62b08ed54e8c83fe3b5c62 *R/formula.utilities.R
+add7116810d2ef3f840f70909f8e3a25 *R/misc.utilities.R
 e2f3f2f2404125b96b47092601f67808 *R/startup.utilities.R
 82673aa50173a93b3bc6f65599330e92 *R/string.utilities.R
 36137a2fad0a0a57abc0271ffd1bf659 *inst/CITATION
@@ -13,6 +14,7 @@ e2f3f2f2404125b96b47092601f67808 *R/startup.utilities.R
 eab99c0ec68e3a9eca81f55a8d704029 *man/check.control.class.Rd
 f6e5656fbfe963b210beb20b81b4381a *man/compress.data.frame.Rd
 cf8bb87b01d8344ca5e8ba50dc0ee2f4 *man/control.list.accessor.Rd
+1940e359bc1d9b0736f00bd1e901d8a0 *man/formula.utilities.Rd
 bf4bf881ed2568c64fb542583b55031e *man/opttest.Rd
 e0d9f4728f2c6ee04874bd53dbb62ca7 *man/paste.and.Rd
 1114b2152fbcee1bc877850981450002 *man/print.control.list.Rd
@@ -20,3 +22,4 @@ e0d9f4728f2c6ee04874bd53dbb62ca7 *man/paste.and.Rd
 57325783df56f78f32be1da0121da8a1 *man/sort.data.frame.Rd
 ae849deb697fb4455bc4283c5e574be6 *man/statnet.cite.Rd
 179e128b3b94b462f332d66e9417e7a1 *man/statnetStartupMessage.Rd
+500cc1ad9acb3982f9b585d382429d69 *man/vector.namesmatch.Rd
