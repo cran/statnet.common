@@ -5,7 +5,7 @@
  *  open source, and has the attribution requirements (GPL Section 7) at
  *  http://statnet.org/attribution
  *
- *  Copyright 2007-2017 Statnet Commons
+ *  Copyright 2007-2018 Statnet Commons
  */
 #include<R.h>
 #include<Rmath.h>
@@ -176,7 +176,7 @@ SEXP logspace_wmean2_wrapper(SEXP xm, SEXP logw){
   xm = PROTECT(coerceVector(xm, REALSXP));
   logw = PROTECT(coerceVector(logw, REALSXP));
   if(n != length(logw)) error("Number of rows in the value matrix differs from the length of the log-weights vector.");
-  SEXP out = PROTECT(coerceVector(allocMatrix(REALSXP, p, p), REALSXP));
+  SEXP out = PROTECT(allocMatrix(REALSXP, p, p));
   logspace_wmean2(REAL(xm), REAL(logw), n, p, REAL(out));
   UNPROTECT(4);
   return(out);

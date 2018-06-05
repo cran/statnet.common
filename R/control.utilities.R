@@ -5,7 +5,7 @@
 #  open source, and has the attribution requirements (GPL Section 7) at
 #  http://statnet.org/attribution
 #
-#  Copyright 2007-2017 Statnet Commons
+#  Copyright 2007-2018 Statnet Commons
 #######################################################################
 .autodetect_dep_warn <- local({
   warned <- c()
@@ -88,7 +88,7 @@ print.control.list <- function(x, ...){
   for(name in names(x)){
     if(!is.null(x[[name]])){
       cat(name,": ",sep="")
-      if(is.list(x[[name]])) print(x[[name]]) else cat(x[[name]],"\n")
+      if(is.list(x[[name]])) print(x[[name]]) else cat(paste(deparse(x[[name]]), collapse=" "),"\n")
     }
   }
 }

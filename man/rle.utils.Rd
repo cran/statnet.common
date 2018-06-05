@@ -23,6 +23,10 @@
 \alias{!=.rle}
 \alias{<=.rle}
 \alias{>=.rle}
+\alias{sum.rle}
+\alias{mean.rle}
+\alias{length.rle}
+\alias{is.na.rle}
 \alias{rep.rle}
 \title{RLE utilities}
 \usage{
@@ -68,11 +72,20 @@ compact.rle(x)
 
 \method{>=}{rle}(e1, e2)
 
-\method{rep}{rle}(x, ..., scale = c("element", "run"))
+\method{sum}{rle}(..., na.rm = FALSE)
+
+\method{mean}{rle}(x, na.rm = FALSE, ...)
+
+\method{length}{rle}(x)
+
+\method{is.na}{rle}(x)
+
+\method{rep}{rle}(x, ..., scale = c("element", "run"), doNotCompact = FALSE)
 }
 \arguments{
-\item{...}{For \code{c}, objects to be concatenated. The first object must be of
-class \code{\link[=rle]{rle()}}. For \code{rep}, see documentation for \code{\link[=rep]{rep()}}.}
+\item{...}{For \code{c}, objects to be concatenated. The first object
+must be of class \code{\link{rle}}. For \code{rep}, see documentation for
+\code{\link{rep}}. For \code{sum}, objects to be summed.}
 
 \item{x, e1, e2}{Arguments to unary (\code{x}) and binary (\code{e1} and \code{e2})
 operators.}
@@ -81,15 +94,22 @@ operators.}
 assumed to be vectorized: it expects two vectors of equal lengths
 and outputs a vector of the same length.}
 
-\item{na.rm}{see documentation for \code{\link[=any]{any()}} and \code{\link[=all]{all()}}.}
+\item{na.rm}{see documentation for \code{\link{any}}, \code{\link{all}}, and \code{\link{sum}}.}
 
 \item{scale}{whether to replicate the elements of the
 RLE-compressed vector or the runs.}
+
+\item{doNotCompact}{whether the method should call \code{\link{compact.rle}}
+the results before returning. Methods liable to produce very long
+output vectors, like \code{\link{rep}}, have this set \code{FALSE} by default.}
 }
 \value{
-All functions return an \code{\link[=rle]{rle()}} object. By default, the
-functions and the operators do not merge adjacent runs with
-the same value. This must be done explicitly with \code{\link[=compact.rle]{compact.rle()}}.
+Unless otherwise stated, all functions return an \code{\link{rle}}
+object. By default, the functions and the operators do not merge
+adjacent runs with the same value. This must be done explicitly
+with \code{\link{compact.rle}}.
+
+\code{\link{any}}, \code{\link{all}}, \code{\link{sum}}, and \code{\link{length}} return logical, logical, numeric, and numeric vectors, respectively.
 }
 \description{
 Simple utilities for operations on RLE-encoded vectors.
@@ -97,32 +117,37 @@ Simple utilities for operations on RLE-encoded vectors.
 \section{Functions}{
 \itemize{
 \item \code{binop.rle}: Perform an arbitrary binary operation on the pair of vectors
-represented by the \code{\link[=rle]{rle()}} objects.
+represented by the \code{\link{rle}} objects.
 
-\item \code{compact.rle}: Compact the \code{\link[=rle]{rle()}} object by merging adjacent runs.
+\item \code{compact.rle}: Compact the \code{\link{rle}} object by merging adjacent runs.
 }}
 
 \note{
-Since \code{\link[=rle]{rle()}} stores run lengths as integers, \code{\link[=compact.rle]{compact.rle()}}
+Since \code{\link{rle}} stores run lengths as integers, \code{\link{compact.rle}}
 will not merge runs that add up to lengths greater than what can
 be represented by a 32-bit signed integer
 (\Sexpr{.Machine$integer.max}).
 
-The \code{\link[=rep]{rep()}} method for \code{\link[=rle]{rle()}} objects is very limited at
-this time: . Even though the default setting is to replicate
+The \code{\link{length}} method returns the length of the vector
+represented by the object, obtained by summing the lengths of
+individual runs.
+
+The \code{\link{rep}} method for \code{\link{rle}} objects is very limited at
+this time. Even though the default setting is to replicate
 elements of the vector, only the run-replicating functionality is
-implemented at this time.
+implemented at this time except for the simplest case (scalar
+\code{times} argument).
 }
 \examples{
 
 x <- rle(as.logical(rbinom(10,1,.7)))
 y <- rle(as.logical(rbinom(10,1,.3)))
 
-stopifnot(c(inverse.rle(x),inverse.rle(y))==inverse.rle(c(x,y)))
+stopifnot(isTRUE(all.equal(c(inverse.rle(x),inverse.rle(y)),inverse.rle(c(x,y)))))
 
-stopifnot((!inverse.rle(x))==inverse.rle(!x))
-stopifnot((inverse.rle(x)|inverse.rle(y))==inverse.rle(x|y))
-stopifnot((inverse.rle(x)&inverse.rle(y))==inverse.rle(x&y))
+stopifnot(isTRUE(all.equal((!inverse.rle(x)),inverse.rle(!x))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)|inverse.rle(y)),inverse.rle(x|y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)&inverse.rle(y)),inverse.rle(x&y))))
 stopifnot(identical(rle(inverse.rle(x)&inverse.rle(y)),compact.rle(x&y)))
 
 big <- structure(list(lengths=as.integer(rep(.Machine$integer.max/4,6)),
@@ -138,36 +163,57 @@ stopifnot(all(aggregate(as.numeric(lengths)~values,
 x <- rle(as.logical(rbinom(10,1,.9)))
 y <- rle(as.logical(rbinom(10,1,.1)))
 
-stopifnot(any(x)==any(inverse.rle(x)))
-stopifnot(any(y)==any(inverse.rle(y)))
+stopifnot(isTRUE(all.equal(any(x),any(inverse.rle(x)))))
+stopifnot(isTRUE(all.equal(any(y),any(inverse.rle(y)))))
 
 
-stopifnot(all(x)==all(inverse.rle(x)))
-stopifnot(all(y)==all(inverse.rle(y)))
+stopifnot(isTRUE(all.equal(all(x),all(inverse.rle(x)))))
+stopifnot(isTRUE(all.equal(all(y),all(inverse.rle(y)))))
 
 
 x <- rle(sample(c(-1,+1), 10, c(.7,.3), replace=TRUE))
 y <- rle(sample(c(-1,+1), 10, c(.3,.7), replace=TRUE))
 
-stopifnot((inverse.rle(x)*inverse.rle(y))==inverse.rle(x*y))
-stopifnot((inverse.rle(x)/inverse.rle(y))==inverse.rle(x/y))
-stopifnot((-inverse.rle(y))==inverse.rle(-y))
-stopifnot((inverse.rle(x)-inverse.rle(y))==inverse.rle(x-y))
-stopifnot((+inverse.rle(y))==inverse.rle(+y))
-stopifnot((inverse.rle(x)+inverse.rle(y))==inverse.rle(x+y))
-stopifnot((inverse.rle(x)^inverse.rle(y))==inverse.rle(x^y))
-stopifnot((inverse.rle(x)\%\%inverse.rle(y))==inverse.rle(x\%\%y))
-stopifnot((inverse.rle(x)\%/\%inverse.rle(y))==inverse.rle(x\%/\%y))
-stopifnot((inverse.rle(x)==inverse.rle(y))==inverse.rle(x==y))
-stopifnot((inverse.rle(x)>inverse.rle(y))==inverse.rle(x>y))
-stopifnot((inverse.rle(x)<inverse.rle(y))==inverse.rle(x<y))
-stopifnot((inverse.rle(x)!=inverse.rle(y))==inverse.rle(x!=y))
-stopifnot((inverse.rle(x)<=inverse.rle(y))==inverse.rle(x<=y))
-stopifnot((inverse.rle(x)>=inverse.rle(y))==inverse.rle(x>=y))
+stopifnot(isTRUE(all.equal((inverse.rle(x)*inverse.rle(y)),inverse.rle(x*y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)/inverse.rle(y)),inverse.rle(x/y))))
+stopifnot(isTRUE(all.equal((-inverse.rle(y)),inverse.rle(-y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)-inverse.rle(y)),inverse.rle(x-y))))
+stopifnot(isTRUE(all.equal((+inverse.rle(y)),inverse.rle(+y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)+inverse.rle(y)),inverse.rle(x+y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)^inverse.rle(y)),inverse.rle(x^y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)\%\%inverse.rle(y)),inverse.rle(x\%\%y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)\%/\%inverse.rle(y)),inverse.rle(x\%/\%y))))
+stopifnot(isTRUE(all.equal(inverse.rle(x)==inverse.rle(y),inverse.rle(x==y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)>inverse.rle(y)),inverse.rle(x>y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)<inverse.rle(y)),inverse.rle(x<y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)!=inverse.rle(y)),inverse.rle(x!=y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)<=inverse.rle(y)),inverse.rle(x<=y))))
+stopifnot(isTRUE(all.equal((inverse.rle(x)>=inverse.rle(y)),inverse.rle(x>=y))))
+
+stopifnot(isTRUE(all.equal(sum(inverse.rle(x)),sum(x))))
+stopifnot(isTRUE(all.equal(sum(inverse.rle(y)),sum(y))))
+
+
+stopifnot(isTRUE(all.equal(mean(inverse.rle(x)),mean(x))))
+stopifnot(isTRUE(all.equal(mean(inverse.rle(y)),mean(y))))
+
+
+stopifnot(isTRUE(all.equal(length(inverse.rle(x)),length(x))))
+stopifnot(isTRUE(all.equal(length(inverse.rle(y)),length(y))))
+
+x$values[1] <- NA
+y$values[1] <- NA
+stopifnot(isTRUE(all.equal(is.na(inverse.rle(x)),inverse.rle(is.na(x)))))
+stopifnot(isTRUE(all.equal(is.na(inverse.rle(y)),inverse.rle(is.na(y)))))
+
 
 x <- rle(sample(c(-1,+1), 10, c(.7,.3), replace=TRUE))
 y <- rpois(length(x$lengths), 2)
 
+stopifnot(isTRUE(all.equal(rep(inverse.rle(x), rep(y, x$lengths)),
+                               inverse.rle(rep(x, y, scale="run")))))
 
-stopifnot(all(rep(inverse.rle(x), rep(y, x$lengths))==inverse.rle(rep(x, y, scale="run"))))
+stopifnot(isTRUE(all.equal(rep(inverse.rle(x), max(y)),
+                               inverse.rle(rep(x, max(y), scale="element")))))
+
 }

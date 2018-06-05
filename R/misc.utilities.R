@@ -5,7 +5,7 @@
 #  open source, and has the attribution requirements (GPL Section 7) at
 #  http://statnet.org/attribution
 #
-#  Copyright 2007-2017 Statnet Commons
+#  Copyright 2007-2018 Statnet Commons
 #######################################################################
 #' reorder vector v into order determined by matching the names of its elements
 #' to a vector of names
@@ -168,51 +168,94 @@ sort.data.frame<-function(x, decreasing=FALSE, ...){
 #' Convenience functions for handling [`NULL`] objects.
 #'
 #' 
+#' @param \dots,test expressions to be tested.
 #' 
 #' @name NVL
+#'
+#' @note Whenever possible, these functions use lazy evaluation, so,
+#'   for example `NVL(1, stop("Error!"))` will never evaluate the
+#'   [`stop`] call and will not produce an error, whereas `NVL(NULL, stop("Error!"))` would.
+#'
 #' @seealso [`NULL`], \code{\link[base]{is.null}}, \code{\link[base]{if}}
 #' @keywords utilities
-#' @examples
-#' 
-#' a <- NULL
-#' 
-#' print(a) # NULL
-#' print(NVL(a,0)) # 0
-#' 
-#' b <- 1
-#' 
-#' print(b) # 1
-#' print(NVL(b,0)) # 1
-#' 
-#' # Also,
-#' print(NVL(NULL,1,0)) # 1
-#' print(NVL(NULL,0,1)) # 0
-#' print(NVL(NULL,NULL,0)) # 0
-#' print(NVL(NULL,NULL,NULL)) # NULL
 #'
-#' NVL(a) <- 2
-#' a # 2
-#' NVL(b) <- 2
-#' b # still 1
-#' @docType class
 NULL
 
 #' @describeIn NVL
 #'
-#' Inspired by SQL function \code{NVL}, `NVL(...)` returns the first
-#' argument that is not \code{NULL}, or \code{NULL} if all arguments
-#' are `NULL`.
+#' Inspired by SQL function \code{NVL}, returns the first argument
+#' that is not \code{NULL}, or \code{NULL} if all arguments are
+#' `NULL`.
 #'
-#' @param \dots Expressions to be tested.
-#'
-#' @docType class
-#'
+#' @examples
+#' a <- NULL
+#' 
+#' a # NULL
+#' NVL(a,0) # 0
+#' 
+#' b <- 1
+#' 
+#' b # 1
+#' NVL(b,0) # 1
+#' 
+#' # Here, object x does not exist, but since b is not NULL, x is
+#' # never evaluated, so the statement finishes.
+#' NVL(b,x) # 1
+#' 
+#' # Also,
+#' NVL(NULL,1,0) # 1
+#' NVL(NULL,0,1) # 0
+#' NVL(NULL,NULL,0) # 0
+#' NVL(NULL,NULL,NULL) # NULL
 #' @export
 NVL <- function(...){
-  for(x in list(...))
+  for(e in eval(substitute(alist(...)))){ # Lazy evaluate. (See http://adv-r.had.co.nz/Computing-on-the-language.html .)
+    x <- eval(e, parent.frame())
     if(!is.null(x)) break
+  }
   x
 }
+
+#' @describeIn NVL
+#'
+#' Inspired by Oracle SQL function `NVL2`, returns the second argument
+#' if the first argument is not `NULL` and the third argument if the
+#' first argument is `NULL`. The third argument defaults to `NULL`, so
+#' `NVL2(a, b)` can serve as shorthand for `(if(!is.null(a)) b)`.
+#'
+#' @param notnull expression to be returned if `test` is not `NULL`.
+#' @param null expression to be returned if `test` is `NULL`.
+#'
+#' @examples
+#' 
+#' NVL2(a, "not null!", "null!") # "null!"
+#' NVL2(b, "not null!", "null!") # "not null!"
+#' @export
+NVL2 <- function(test, notnull, null = NULL){
+  if(is.null(test)) null else notnull
+}
+
+
+#' @describeIn NVL
+#'
+#' Inspired by Oracle SQL `NVL2` function and `magittr` \code{\%>\%}
+#' operator, behaves as `NVL2` but `.`s in the second argument are
+#' substituted with the first argument.
+#'
+#' @examples
+#' 
+#' NVL3(a, "not null!", "null!") # "null!"
+#' NVL3(b, .+1, "null!") # 2
+#' @export
+NVL3 <- function(test, notnull, null = NULL){
+  if(is.null(test)) null
+  else{
+    e <- substitute(notnull)
+    eval(do.call(substitute, list(e, list(.=test))),
+         parent.frame())
+  }
+}
+
 
 #' @describeIn NVL
 #'
@@ -223,8 +266,12 @@ NVL <- function(...){
 #' @param x an object to be overwritten if [`NULL`].
 #' @param value new value for `x`.
 #'
-#' @docType class
-#'
+#' @examples
+#' 
+#' NVL(a) <- 2
+#' a # 2
+#' NVL(b) <- 2
+#' b # still 1
 #' @export
 `NVL<-` <- function(x, value){
   if(is.null(x)) value
@@ -241,19 +288,42 @@ NVL <- function(...){
 #' 
 #' 
 #' @param \dots Expressions to be tested; usually outputs of
-#' \code{\link[base]{try}}.
-#' @return The first argument that is not a \code{try-error}. Stops with an
-#' error if all are.
+#'   \code{\link[base]{try}}.
+#' @return The first argument that is not a \code{try-error}. Stops
+#'   with an error if all are.
+#' @note This function uses lazy evaluation, so, for example `ERRVL(1,
+#'   stop("Error!"))` will never evaluate the [`stop`] call and will
+#'   not produce an error, whereas `ERRVL(try(solve(0)),
+#'   stop("Error!"))` would.
+#'
+#' In addition, all expressions after the first may contain a `.`,
+#' which is substituted with the `try-error` object returned by the
+#' previous expression.
+#' 
 #' @seealso \code{\link[base]{try}}, \code{\link[base]{inherits}}
 #' @keywords utilities
 #' @examples
 #' 
 #' print(ERRVL(1,2,3)) # 1
 #' print(ERRVL(try(solve(0)),2,3)) # 2
+#' print(ERRVL(1, stop("Error!"))) # No error
+#' 
+#' \dontrun{
+#' # Error:
+#' print(ERRVL(try(solve(0), silent=TRUE),
+#'             stop("Error!")))
+#' 
+#' # Error with an elaborate message:
+#' print(ERRVL(try(solve(0), silent=TRUE),
+#'             stop("Stopped with an error: ", .)))
+#' }
 #' @export
 ERRVL <- function(...){
-  for(x in list(...))
+  x <- NULL
+  for(e in eval(substitute(alist(...)))){ # Lazy evaluate. (See http://adv-r.had.co.nz/Computing-on-the-language.html .)
+    x <- eval(if(inherits(x, "try-error")) do.call(substitute, list(e, list(.=x))) else e, parent.frame())
     if(!inherits(x, "try-error")) return(x)
+  }
   stop("No non-error expressions passed.")
 }
 
@@ -294,7 +364,7 @@ opttest <- function(expr, testname=NULL, testvar="ENABLE_statnet_TESTS", yesvals
 #'
 #' @return `TRUE` if all elements of `x` are identical to each other.
 #'
-#' @seealso [base::identical()]
+#' @seealso [`identical`]
 #'
 #' @examples
 #'
@@ -307,4 +377,25 @@ all_identical <- function(x){
   v0 <- x[[1]]
   for(v in x[-1]) if(!identical(v0,v)) return(FALSE)
   return(TRUE)
+}
+
+#' Construct a logical vector with `TRUE` in specified positions.
+#'
+#' This function is basically an inverse of [`which`].
+#'
+#' @param which a numeric vector of indices to set to `TRUE`.
+#' @param n total length of the output vector.
+#'
+#' @return A logical vector of length `n` whose elements listed in
+#'   `which` are set to `TRUE`, and all other elements set to `FALSE`.
+#'
+#' @examples
+#'
+#' x <- as.logical(rbinom(10,1,0.5))
+#' stopifnot(all(x == unwhich(which(x), 10)))
+#' @export
+unwhich <- function(which, n){
+  o <- logical(n)
+  if(length(which)) o[which] <- TRUE
+  o
 }
