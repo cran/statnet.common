@@ -1,13 +1,13 @@
-41ede64011cde103fc6c74d36b4051c3 *DESCRIPTION
+f3b5cc655fa3fb7b60f846826c765ed7 *DESCRIPTION
 f46e40f863d8910e55b98b9a3d05ec06 *LICENSE
 43e4c7463517a28ed58b7d2f1a8b5436 *NAMESPACE
 bd44d344abb1004b667f62f8f1574575 *NEWS
 f379f06e540d89a627bc1cc00a688c08 *NEWS.md
 e23187472f2acf33bb856846be5a4506 *R/cite.utilities.R
 e8449a6490319e3152b741edc6967fc8 *R/control.utilities.R
-5514195042f52e5639c8da36e6d5a811 *R/formula.utilities.R
+721fbd221e9372fc4a837333dceeadd1 *R/formula.utilities.R
 4db1e6397123f53d655b8eaced18586d *R/logspace.utils.R
-f2c380090583a8dae46dd96125a67f6f *R/mcmc-utils.R
+41dbe2a098e8b9946dcd7da2e1a3e06e *R/mcmc-utils.R
 d1897b0289f74d1840e3950802a7aa10 *R/misc.utilities.R
 2a282383952f220d7c945c8b92b44d7b *R/rle_utils.R
 01599caefbaa2535d08b9c71e2072633 *R/startup.utilities.R
@@ -15,8 +15,8 @@ d1897b0289f74d1840e3950802a7aa10 *R/misc.utilities.R
 a2db0dffce4abe41cddd109c6fdbc67b *R/wmatrix.R
 a980adf6d407b1f67260e7558a353656 *R/zzz.R
 0f34b5d1537b74925701a39ac0b08ab3 *README.md
-c9e8ecd7126c5c6867da718b5f208965 *build/statnet.common.pdf
-36c97020ccf91016c73c85b63ce66ced *inst/CITATION
+cfe4af75fd526595d75016c4878fd19f *build/statnet.common.pdf
+7e0a25b9d26028d32b554fe398a723cc *inst/CITATION
 7f2a94a498a5dc05b0503c5a31ab87b5 *man/ERRVL.Rd
 806abfb994987fe5e3d4b91f4b3f1340 *man/NVL.Rd
 b8da6a5b1e1749ebb1e2bd91fee52ae4 *man/all_identical.Rd
@@ -29,7 +29,7 @@ a7f060808f5f7e651861503112d29ae6 *man/compress_rows.Rd
 77addee8ef056b74fa347e6153c43d6a *man/despace.Rd
 39a16073ed061f750f886256da05ed9d *man/formula.utilities.Rd
 9c11919edb8912ce18ecffdda5d8da22 *man/logspace.utils.Rd
-2ec7bf6e6ec0694f6281ee30066fec43 *man/mcmc-utilities.Rd
+e48c316a95096eec536ac467df8afea5 *man/mcmc-utilities.Rd
 c4e645b96228c6f88533cf55dde327c6 *man/message_print.Rd
 e9a74bc2c57dca57c63e49a07c6ed12f *man/opttest.Rd
 7f1cd031b808ff7070fcdba16ee1f164 *man/paste.and.Rd
