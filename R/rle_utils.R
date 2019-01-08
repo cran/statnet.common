@@ -5,7 +5,7 @@
 #  open source, and has the attribution requirements (GPL Section 7) at
 #  http://statnet.org/attribution
 #
-#  Copyright 2007-2018 Statnet Commons
+#  Copyright 2007-2019 Statnet Commons
 #######################################################################
 .check_lengths <- function(rle1, rle2){
   if(sum(as.numeric(rle1$lengths))!=sum(as.numeric(rle2$lengths)))
@@ -22,13 +22,12 @@
 #' 
 #' @noRd
 .run_mul <- function(e1, e2){
-  o <- suppressWarnings(as.integer(e1)*as.integer(e2))
-  if(is.na(o)){ # Integer overflow.
-    do <- as.numeric(e1)*as.numeric(e2)
-    c(as.integer(rep.int(.Machine$integer.max, do %/% .Machine$integer.max)), as.integer(do %% .Machine$integer.max))
+  o <- as.numeric(e1)*as.numeric(e2)
+  if(o > .Machine$integer.max){ # Integer overflow.
+    c(as.integer(rep.int(.Machine$integer.max, o %/% .Machine$integer.max)), as.integer(o %% .Machine$integer.max))
   }else if(o==0){
     integer(0)
-  }else o
+  }else as.integer(o)
 }
 
 #' RLE utilities

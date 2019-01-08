@@ -5,14 +5,12 @@
 #  open source, and has the attribution requirements (GPL Section 7) at
 #  http://statnet.org/attribution
 #
-#  Copyright 2007-2018 Statnet Commons
+#  Copyright 2007-2019 Statnet Commons
 #######################################################################
 ###################################################################
 ## This file has utilities whose primary purpose is examining or ##
 ## manipulating ERGM formulas.                                   ##
 ###################################################################
-
-.NotYetDeprecated <- function(...){}
 
 #' @title Functions for Querying, Validating and Extracting from Formulas
 #'
@@ -74,7 +72,7 @@ append_rhs.formula<-function(object,newterms,keep.onesided=FALSE){
 #' \code{append.rhs.formula} has been renamed to \code{append_rhs.formula}.
 #' @export
 append.rhs.formula<-function(object,newterms,keep.onesided=FALSE){
-  .NotYetDeprecated("append_rhs.formula")
+  .Deprecate_once("append_rhs.formula")
   append_rhs.formula(object,newterms,keep.onesided)
 }
 
@@ -113,7 +111,7 @@ append.rhs.formula<-function(object,newterms,keep.onesided=FALSE){
 #'   `TRUE` or `FALSE`, for whether that term should be kept.
 #' @export
 filter_rhs.formula <- function(object, f, ...){
-  rhs <- object[[length(object)]]
+  rhs <- ult(object)
   SnD <- function(x){
     if(!f(x, ...)) return(NULL)
     if(is(x, "call")){
@@ -137,7 +135,7 @@ filter_rhs.formula <- function(object, f, ...){
   }
 
   rhs <- SnD(rhs)
-  object[[length(object)]] <- rhs
+  ult(object) <- rhs
   object
 }
 
@@ -215,7 +213,7 @@ nonsimp_update.formula<-function (object, new, ..., from.new=FALSE){
 #' \code{nonsimp.update.formula} has been renamed to \code{nonsimp_update.formula}.
 #' @export
 nonsimp.update.formula<-function (object, new, ..., from.new=FALSE){
-  .NotYetDeprecated("nonsimp_update.formula")
+  .Deprecate_once("nonsimp_update.formula")
   nonsimp_update.formula(object, new, ..., from.new=from.new)
 }
 
@@ -251,7 +249,7 @@ nonsimp.update.formula<-function (object, new, ..., from.new=FALSE){
 #' 
 #' @export
 term.list.formula<-function(rhs, sign=+1){
-  .NotYetDeprecated("list_rhs.formula")
+  .Deprecate_once("list_rhs.formula")
   .recurse_summation(rhs, sign)
 }
 
@@ -285,7 +283,7 @@ list_rhs.formula<-function(object){
   if (!is(object, "formula"))
     stop("Invalid formula of class ",sQuote(class(object)),".")
   
-  .recurse_summation(object[[length(object)]], sign=+1)
+  .recurse_summation(ult(object), sign=+1)
 }
 
 

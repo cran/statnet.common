@@ -5,7 +5,7 @@
 #  open source, and has the attribution requirements (GPL Section 7) at
 #  http://statnet.org/attribution
 #
-#  Copyright 2007-2018 Statnet Commons
+#  Copyright 2007-2019 Statnet Commons
 #######################################################################
 #' reorder vector v into order determined by matching the names of its elements
 #' to a vector of names
@@ -387,7 +387,8 @@ all_identical <- function(x){
 #' @param n total length of the output vector.
 #'
 #' @return A logical vector of length `n` whose elements listed in
-#'   `which` are set to `TRUE`, and all other elements set to `FALSE`.
+#'   `which` are set to `TRUE`, and whose other elements are set to
+#'   `FALSE`.
 #'
 #' @examples
 #'
@@ -398,4 +399,137 @@ unwhich <- function(which, n){
   o <- logical(n)
   if(length(which)) o[which] <- TRUE
   o
+}
+
+#' Evaluate an \R expression with a hard time limit by forking a process
+#'
+#' This function uses
+#' #ifndef windows
+#' [parallel::mcparallel()],
+#' #endif
+#' #ifdef windows
+#' `parallel::mcparallel()`,
+#' #endif
+#' so the time limit is not
+#' enforced on Windows. However, unlike functions using [setTimeLimit()], the time
+#' limit is enforced even on native code.
+#'
+#' @param expr expression to be evaluated.
+#' @param timeout number of seconds to wait for the expression to
+#'   evaluate.
+#' @param unsupported a character vector of length 1 specifying how to
+#'   handle a platform that does not support
+#' #ifndef windows
+#' [parallel::mcparallel()],
+#' #endif
+#' #ifdef windows
+#' `parallel::mcparallel()`,
+#' #endif
+#'   \describe{
+#'
+#'   \item{`"warning"` or `"message"`}{Issue a warning or a message,
+#'   respectively, then evaluate the expression without the time limit
+#'   enforced.}
+#'
+#'   \item{`"error"`}{Stop with an error.}
+#'
+#'   \item{`"silent"`}{Evaluate the expression without the time limit
+#'   enforced, without any notice.}
+#'
+#'   } Partial matching is used.
+#' @param onTimeout Value to be returned on time-out.
+#'
+#' @return Result of evaluating `expr` if completed, `onTimeout`
+#'   otherwise.
+#'
+#' @note `onTimeout` can itself be an expression, so it is, for
+#'   example, possible to stop with an error by passing
+#'   `onTimeout=stop()`.
+#'
+#' @note Note that this function is not completely transparent:
+#'   side-effects may behave in unexpected ways. In particular, RNG
+#'   state will not be updated.
+#'
+#' @examples
+#'
+#' forkTimeout({Sys.sleep(1); TRUE}, 2) # TRUE
+#' forkTimeout({Sys.sleep(1); TRUE}, 0.5) # NULL (except on Windows)
+#' @export
+forkTimeout <- function(expr, timeout, unsupported = c("warning","error","message","silent"), onTimeout = NULL){
+  loadNamespace("parallel")
+  loadNamespace("tools")
+  env <- parent.frame()
+  if(!exists("mcparallel", where=asNamespace("parallel"), mode="function")){ # fork() is not available on the system.
+    unsupported <- match.arg(unsupported)
+    warnmsg <- "Your platform (probably Windows) does not have fork() capabilities. Time limit will not be enforced."
+    errmsg <- "Your platform (probably Windows) does not have fork() capabilities."
+    switch(unsupported,
+           message = message(warnmsg),
+           warning = warning(warnmsg),
+           error = stop(errmsg))
+
+    out <- eval(expr, env)
+  }else{ # fork() is available on the system.
+
+    ## TODO: The suppressWarnings() are working around a bug in
+    ## current parallel package. They should not be necessary after
+    ## the next R release.
+    child <- parallel::mcparallel(eval(expr, env), mc.interactive=NA)
+    out <- suppressWarnings(parallel::mccollect(child, wait=FALSE, timeout=timeout))
+
+    if(is.null(out)){ # Timed out with no result: kill.
+      tools::pskill(child$pid)
+      out <- onTimeout
+    }else{
+      out <- out[[1]]
+    }
+
+    suppressWarnings(parallel::mccollect(child)) # Clean up.
+  }
+  out
+}
+
+#' Extract or replace the *ult*imate (last) element of a vector or a list, or an element counting from the end.
+#'
+#' @param x a vector or a list.
+#' @param i index from the end of the list to extract or replace (where 1 is the last element, 2 is the penultimate element, etc.).
+#'
+#' @return An element of `x`.
+#'
+#' @examples
+#' x <- 1:5
+#' (last <- ult(x))
+#' (penultimate <- ult(x, 2)) # 2nd last.
+#'
+#' \dontshow{
+#' stopifnot(last==5)
+#' stopifnot(penultimate==4)
+#' }
+#'
+#' @export
+ult <- function(x, i=1){
+  x[[length(x)-i+1]]
+}
+
+#' @rdname ult
+#'
+#' @param value Replacement value for the `i`th element from the end.
+#'
+#' @note Due to the way in which assigning to a function is
+#'   implemented in R, `ult(x) <- e` may be less efficient than
+#'   `x[[length(x)]] <- e`.
+#' 
+#' @examples
+#' (ult(x) <- 6)
+#' (ult(x, 2) <- 7) # 2nd last.
+#' x
+#'
+#' \dontshow{
+#' stopifnot(all(x == c(1:3, 7L, 6L)))
+#' }
+#'
+#' @export
+`ult<-` <- function(x, i=1, value){
+  x[[length(x)-i+1]] <- value
+  x
 }
