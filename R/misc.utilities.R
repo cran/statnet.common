@@ -1,9 +1,9 @@
 #  File R/misc.utilities.R in package statnet.common, part of the Statnet suite
-#  of packages for network analysis, http://statnet.org .
+#  of packages for network analysis, https://statnet.org .
 #
 #  This software is distributed under the GPL-3 license.  It is free,
 #  open source, and has the attribution requirements (GPL Section 7) at
-#  http://statnet.org/attribution
+#  https://statnet.org/attribution
 #
 #  Copyright 2007-2019 Statnet Commons
 #######################################################################
@@ -114,14 +114,14 @@ order.default <- function(..., na.last = TRUE, decreasing = FALSE) base::order(.
 #' @rdname sort.data.frame
 #' @export
 order.data.frame<-function(..., na.last = TRUE, decreasing=FALSE){
-  x <- list(...)[[1]]
+  x <- list(...)[[1L]]
   do.call(base::order,c(unname(x), na.last=na.last, decreasing=decreasing))
 }
 
 #' @rdname sort.data.frame
 #' @export
 order.matrix<-function(..., na.last = TRUE, decreasing=FALSE){
-  x <- list(...)[[1]]
+  x <- list(...)[[1L]]
   do.call(base::order,c(lapply(seq_len(ncol(x)), function(i) x[,i]), na.last=na.last, decreasing=decreasing))
 }
 
@@ -256,6 +256,47 @@ NVL3 <- function(test, notnull, null = NULL){
   }
 }
 
+#' @describeIn NVL
+#'
+#' As `NVL`, but for any objects of length 0 (*E*mpty) rather than just `NULL`. Note that if no non-zero-length arguments are given, `NULL` is returned.
+#'
+#' @examples
+#'
+#' NVL(NULL*2, 1) # numeric(0) is not NULL
+#' EVL(NULL*2, 1) # 1
+#'
+#' @export
+EVL <- function(...){
+  o <- NULL
+  for(e in eval(substitute(alist(...)))){ # Lazy evaluate. (See http://adv-r.had.co.nz/Computing-on-the-language.html .)
+    x <- eval(e, parent.frame())
+    if(length(x)){ o <- x;  break }
+  }
+  o
+}
+
+#' @describeIn NVL
+#'
+#' As `NVL2`, but for any objects of length 0 (*E*mpty) rather than just `NULL`.
+#'
+#' @export
+EVL2 <- function(test, notnull, null = NULL){
+  if(length(test)) notnull else null
+}
+
+#' @describeIn NVL
+#'
+#' As `NVL3`, but for any objects of length 0 (*E*mpty) rather than just `NULL`.
+#'
+#' @export
+EVL3 <- function(test, notnull, null = NULL){
+  if(length(test)==0) null
+  else{
+    e <- substitute(notnull)
+    eval(do.call(substitute, list(e, list(.=test))),
+         parent.frame())
+  }
+}
 
 #' @describeIn NVL
 #'
@@ -267,7 +308,7 @@ NVL3 <- function(test, notnull, null = NULL){
 #' @param value new value for `x`.
 #'
 #' @examples
-#' 
+#'
 #' NVL(a) <- 2
 #' a # 2
 #' NVL(b) <- 2
@@ -276,6 +317,16 @@ NVL3 <- function(test, notnull, null = NULL){
 `NVL<-` <- function(x, value){
   if(is.null(x)) value
   else x
+}
+
+#' @describeIn NVL
+#'
+#' As assignment to `NVL`, but for any objects of length 0 (*E*mpty) rather than just `NULL`.
+#'
+#' @export
+`EVL<-` <- function(x, value){
+  if(length(x)) x
+  else value
 }
 
 
@@ -374,7 +425,7 @@ opttest <- function(expr, testname=NULL, testvar="ENABLE_statnet_TESTS", yesvals
 #' @export
 all_identical <- function(x){
   if(length(x)==0) return(TRUE)
-  v0 <- x[[1]]
+  v0 <- x[[1L]]
   for(v in x[-1]) if(!identical(v0,v)) return(FALSE)
   return(TRUE)
 }
@@ -480,11 +531,11 @@ forkTimeout <- function(expr, timeout, unsupported = c("warning","error","messag
     if(is.null(out)){ # Timed out with no result: kill.
       tools::pskill(child$pid)
       out <- onTimeout
+      suppressWarnings(parallel::mccollect(child)) # Clean up.
     }else{
-      out <- out[[1]]
+      out <- out[[1L]]
     }
 
-    suppressWarnings(parallel::mccollect(child)) # Clean up.
   }
   out
 }
@@ -507,8 +558,8 @@ forkTimeout <- function(expr, timeout, unsupported = c("warning","error","messag
 #' }
 #'
 #' @export
-ult <- function(x, i=1){
-  x[[length(x)-i+1]]
+ult <- function(x, i=1L){
+  x[[length(x)-i+1L]]
 }
 
 #' @rdname ult
@@ -529,7 +580,168 @@ ult <- function(x, i=1){
 #' }
 #'
 #' @export
-`ult<-` <- function(x, i=1, value){
-  x[[length(x)-i+1]] <- value
+`ult<-` <- function(x, i=1L, value){
+  x[[length(x)-i+1L]] <- value
   x
+}
+
+#' Evaluate a function once for a given input.
+#'
+#' This is a `purrr`-style adverb that checks if a given function has
+#' already been called with a given configuration of arguments and
+#' skips it if it has.
+#'
+#' @param f A function to modify.
+#' @param expire_after The number of seconds since it was added to the
+#'   database before a particular configuration is "forgotten". This
+#'   can be used to periodically remind the user without overwhelming
+#'   them.
+#' @param max_entries The number of distinct configurations to
+#'   remember. If not `Inf`, *earliest-inserted* configurations will
+#'   be removed from the database when capacity is exceeded. (This
+#'   exact behavior may change in the future.)
+#'
+#' @details Each modified function instance returned by `once()`
+#'   maintains a database of previous argument configurations. They
+#'   are not in any way compressed, so this database may grow over
+#'   time. Thus, this wrapper should be used with caution if arguments
+#'   are large objects. This may be replaced with hashing in the
+#'   future. In the meantime, you may want to set the `max_entries`
+#'   argument to be safe.
+#'
+#'   Different instances of a modified function do not share
+#'   databases, even if the function is the same. This means that if
+#'   you, say, modify a function within another function, the modified
+#'   function will call once per call to the outer function. Modified
+#'   functions defined at package level count as the same "instance",
+#'   however. See example.
+#'
+#' @note Because the function needs to test whether a particular
+#'   configuration of arguments have already been used, do not rely on
+#'   lazy evaluation behaviour.
+#'
+#' @examples
+#' msg <- once(message)
+#' msg("abc") # Prints.
+#' msg("abc") # Silent.
+#'
+#' msg <- once(message) # Starts over.
+#' msg("abc") # Prints.
+#'
+#' f <- function(){
+#'   innermsg  <- once(message)
+#'   innermsg("efg") # Prints once per call to f().
+#'   innermsg("efg") # Silent.
+#'   msg("abcd") # Prints only the first time f() is called.
+#'   msg("abcd") # Silent.
+#' }
+#' f() # Prints "efg" and "abcd".
+#' f() # Prints only "efg".
+#'
+#' msg3 <- once(message, max_entries=3)
+#' msg3("a") # 1 remembered.
+#' msg3("a") # Silent.
+#' msg3("b") # 2 remembered.
+#' msg3("a") # Silent.
+#' msg3("c") # 3 remembered.
+#' msg3("a") # Silent.
+#' msg3("d") # "a" forgotten.
+#' msg3("a") # Printed.
+#'
+#' msg2s <- once(message, expire_after=2)
+#' msg2s("abc") # Prints.
+#' msg2s("abc") # Silent.
+#' Sys.sleep(1)
+#' msg2s("abc") # Silent after 1 sec.
+#' Sys.sleep(1.1)
+#' msg2s("abc") # Prints after 2.1 sec.
+#'
+#' @export
+once <- function(f, expire_after=Inf, max_entries=Inf){
+  local({
+    prev <- list()
+    prev.time <- c()
+    function(...){
+      # If using expire_after, expire old entries.
+      if(is.finite(expire_after)){
+        expired <- Sys.time() - prev.time > expire_after
+        prev <<- prev[!expired]
+        prev.time <<- prev.time[!expired]
+      }
+      sig <- list(...)
+      if(! list(sig)%in%prev){
+        prev <<- c(prev, list(sig))
+        prev.time <<- c(prev.time, Sys.time())
+        if(length(prev) > max_entries){
+          prev <<- prev[-1]
+          prev.time <<- prev.time[-1]
+        }
+        f(...)
+      }
+    }
+  })
+}
+
+#' Evaluate an expression, restarting on error
+#'
+#' A pair of functions paralleling [eval()] and [evalq()] that make
+#' multiple attempts at evaluating an expression, retrying on error up
+#' to a specified number of attempts, and optionally evaluating
+#' another expression before restarting.
+#'
+#' @param expr an expression to be retried; note the difference
+#'   between [eval()] and [evalq()].
+#' @param retries number of retries to make; defaults to
+#'   `"eval.retries"` option, or 5.
+#' @param beforeRetry if given, an expression that will be evaluated
+#'   before each retry if the initial attempt fails; it is evaluated
+#'   in the same environment and with the same quoting semantics as
+#'   `expr`, but its errors are not handled.
+#' @param envir,enclos see [eval()].
+#' @param verbose Whether to output retries.
+#'
+#' @note If `expr` returns a `"try-error"` object (returned by
+#'   [try()]), it will be treated as an error. This behavior may
+#'   change in the future.
+#'
+#' @return Results of evaluating `expr`, including side-effects such
+#'   as variable assignments, if successful in `retries` retries.
+#'
+#' @examples
+#' x <- 0
+#' persistEvalQ({if((x<-x+1)<3) stop("x < 3") else x},
+#'              beforeRetry = {cat("Will try incrementing...\n")})
+#'
+#' x <- 0
+#' e <- quote(if((x<-x+1)<3) stop("x < 3") else x)
+#' persistEval(e,
+#'             beforeRetry = quote(cat("Will try incrementing...\n")))
+#' @export
+persistEval <- function(expr, retries=NVL(getOption("eval.retries"), 5), beforeRetry,
+                        envir = parent.frame(),
+                        enclos = if (is.list(envir) ||
+                                     is.pairlist(envir)) parent.frame() else baseenv(), verbose=FALSE){
+  for(attempt in seq_len(retries)){
+    out <- try(eval(expr, envir=envir, enclos=enclos), silent=TRUE)
+    if(!is(out, "try-error")) return(out)
+    else{
+      if(!missing(beforeRetry)) eval(beforeRetry, envir=envir, enclos=enclos)
+      if(verbose) message("Retrying: retry ", attempt, ".")
+    }
+  }
+  out <- eval(expr, envir=envir, enclos=enclos)
+}
+
+#' @rdname persistEval
+#' @export
+persistEvalQ <- function(expr, retries=NVL(getOption("eval.retries"), 5), beforeRetry,
+                         envir = parent.frame(),
+                         enclos = if (is.list(envir) ||
+                                      is.pairlist(envir)) parent.frame() else baseenv(), verbose=FALSE){
+  expr <- substitute(expr)
+  beforeRetry <- substitute(beforeRetry)
+  envir <- force(envir)
+  enclos <- force(enclos)
+
+  persistEval(expr=expr, retries=retries, beforeRetry=beforeRetry, envir=envir, enclos=enclos, verbose=verbose)
 }

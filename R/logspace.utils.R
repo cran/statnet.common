@@ -1,9 +1,9 @@
 #  File R/logspace.utils.R in package statnet.common, part of the Statnet suite
-#  of packages for network analysis, http://statnet.org .
+#  of packages for network analysis, https://statnet.org .
 #
 #  This software is distributed under the GPL-3 license.  It is free,
 #  open source, and has the attribution requirements (GPL Section 7) at
-#  http://statnet.org/attribution
+#  https://statnet.org/attribution
 #
 #  Copyright 2007-2019 Statnet Commons
 #######################################################################
@@ -78,8 +78,8 @@ lweighted.mean <- function(x, logw){
   }else if(length(d)>2){
     stop("Arrays of 3 or more dimensions are not supported at this time.")
   }else{ # Matrix
-    if(d[1]==0) rep(NaN, d[2])
-    else if(d[1]!=length(logw)) stop("logw must have the same length as the number of rows in x")
+    if(d[1L]==0) rep(NaN, d[2L])
+    else if(d[1L]!=length(logw)) stop("logw must have the same length as the number of rows in x")
     else .Call("logspace_wmeans_wrapper", x, logw, PACKAGE="statnet.common")
   }
 }
