@@ -5,7 +5,7 @@
 #  open source, and has the attribution requirements (GPL Section 7) at
 #  https://statnet.org/attribution
 #
-#  Copyright 2007-2019 Statnet Commons
+#  Copyright 2007-2020 Statnet Commons
 #######################################################################
 ###################################################################
 ## This file has utilities whose primary purpose is examining or ##
@@ -165,9 +165,8 @@ nonsimp_update.formula<-function (object, new, ..., from.new=FALSE){
   new.rhs <- if(length(new)==2) new[[2L]] else new[[3L]]
   
   sub.dot <- function(c, dot){
-    if(is.null(dot)) c # If nothing to substitute with, just return it.
+    if(is.name(c) && c==".")  dot # If it's a dot, return substitute.
     else if(is.call(c)) as.call(c(list(c[[1L]]), lapply(c[-1], sub.dot, dot))) # If it's a call, construct a call consisting of the call and each of the arguments with the substitution performed, recursively.
-    else if(is.name(c) && c==".")  dot # If it's a dot, return substitute.
     else c # If it's anything else, just return it.
   }
   
@@ -188,7 +187,17 @@ nonsimp_update.formula<-function (object, new, ..., from.new=FALSE){
     }else return(c)
   }
   
-  out <- if(length(new)==2) call("~", deparen(sub.dot(new.rhs, old.rhs))) else call("~", deparen(sub.dot(new.lhs, old.lhs)), deparen(sub.dot(new.rhs, old.rhs)))
+
+  # This is using some argument alchemy to handle the situation in
+  # which object is one-sided but new is two sided with a dot in the
+  # LHS. quote(expr=) creates a missing argument object that gets
+  # substituted in place of a dot. The next statement then checks if
+  # the resulting LHS *is* a missing object (as it is when the
+  # arguments are ~a and .~.) removes the LHS if it is.
+  out <- if(length(new)==2) call("~", deparen(sub.dot(new.rhs, old.rhs)))
+         else if(length(object)==2) call("~", deparen(sub.dot(new.lhs, quote(expr=))), deparen(sub.dot(new.rhs, old.rhs)))
+         else call("~", deparen(sub.dot(new.lhs, old.lhs)), deparen(sub.dot(new.rhs, old.rhs)))
+  if(identical(out[[2]], quote(expr=))) out <- out[-2]
 
   #  a new sub-environment for the formula, containing both
   # the variables from the old formula and the new.
@@ -198,9 +207,9 @@ nonsimp_update.formula<-function (object, new, ..., from.new=FALSE){
   }else{
     # Create a sub-environment also containing variables from environment of new.
     e <- new.env(parent=environment(object))
-    
-    if(identical(from.new,TRUE)) from.new <- ls(pos=environment(new)) # If TRUE, copy all of them (dangerous!).
-    
+
+    if(identical(from.new,TRUE)) from.new <- setdiff(ls(pos=environment(new), all.names=TRUE), "...") # If TRUE, copy all of them but the dots (dangerous!).
+
     for(name in from.new)
       assign(name, get(name, pos=environment(new)), pos=e)
   }
@@ -307,4 +316,38 @@ eval_lhs.formula <- function(object){
     stop("Formula given is one-sided.")
 
   eval(object[[2L]],envir=environment(object))
+}
+
+#' Make a copy of an environment with just the selected objects.
+#'
+#' @param object An [`environment`] or an object with
+#'   [`environment()`] and `environment()<-` methods.
+#' @param ... Additional arguments, passed on to lower-level methods.
+#'
+#' @param keep A character vector giving names of variables in the
+#'   environment (including its ancestors) to copy over, defaulting to
+#'   dropping all. Variables that cannot be resolved are silently
+#'   ignored.
+#'
+#' @return An object of the same type as `object`, with updated environment.
+#' @export
+trim_env <- function(object, keep=NULL, ...){
+  UseMethod("trim_env")
+}
+
+#' @describeIn trim_env A method for environment objects.
+#' @export
+trim_env.environment <- function(object, keep=NULL, ...){
+  e <- new.env(parent=baseenv())
+  for(vn in keep){
+    try(assign(vn, get(vn, envir=object), envir=e), silent=TRUE)
+  }
+  e
+}
+
+#' @describeIn trim_env Default method, for objects such as [`formula`] and [`function`] that have [`environment()`] and `environment()<-` methods.
+#' @export
+trim_env.default <- function(object, keep=NULL, ...){
+  environment(object) <- trim_env(environment(object), keep, ...)
+  object
 }

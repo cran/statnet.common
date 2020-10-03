@@ -25,11 +25,23 @@
 \alias{[<-.wmatrix}
 \title{A data matrix with row weights}
 \usage{
-logwmatrix(data = NA, nrow = 1, ncol = 1, byrow = FALSE,
-  dimnames = NULL, w = NULL)
+logwmatrix(
+  data = NA,
+  nrow = 1,
+  ncol = 1,
+  byrow = FALSE,
+  dimnames = NULL,
+  w = NULL
+)
 
-linwmatrix(data = NA, nrow = 1, ncol = 1, byrow = FALSE,
-  dimnames = NULL, w = NULL)
+linwmatrix(
+  data = NA,
+  nrow = 1,
+  ncol = 1,
+  byrow = FALSE,
+  dimnames = NULL,
+  w = NULL
+)
 
 is.wmatrix(x)
 
@@ -78,7 +90,9 @@ as.logwmatrix(x, ...)
 
 \item{...}{extra arguments, currently unused.}
 
-\item{target.nrows}{see \code{\link{decompress_rows}}.}
+\item{target.nrows}{the approximate number of rows the uncompressed matrix
+should have; if not achievable exactly while respecting proportionality, a
+matrix with a slightly different number of rows will be constructed.}
 
 \item{i, j, value}{rows and columns and values for extraction or
 replacement; as \code{\link{matrix}}.}

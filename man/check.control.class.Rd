@@ -5,9 +5,11 @@
 \title{Check if the class of the control list is one of those that can be used by
 the calling function}
 \usage{
-check.control.class(OKnames = as.character(ult(sys.calls(), 2)[[1L]]),
+check.control.class(
+  OKnames = as.character(ult(sys.calls(), 2)[[1L]]),
   myname = as.character(ult(sys.calls(), 2)[[1L]]),
-  control = get("control", pos = parent.frame()))
+  control = get("control", pos = parent.frame())
+)
 }
 \arguments{
 \item{OKnames}{List of control function names which are acceptable.}
@@ -28,6 +30,6 @@ acceptable classes.
 In earlier versions, \code{OKnames} and \code{myname} were autodetected. This capability has been deprecated and results in a warning issued once per session. They now need to be set explicitly.
 }
 \seealso{
-set.control.class, print.control.list
+\code{\link[=set.control.class]{set.control.class()}}, \code{\link[=print.control.list]{print.control.list()}}
 }
 \keyword{utilities}
