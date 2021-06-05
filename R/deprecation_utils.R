@@ -5,7 +5,7 @@
 #  open source, and has the attribution requirements (GPL Section 7) at
 #  https://statnet.org/attribution
 #
-#  Copyright 2007-2020 Statnet Commons
+#  Copyright 2007-2021 Statnet Commons
 #######################################################################
 
 #' @name deprecation-utilities
@@ -22,7 +22,7 @@ NULL
 #' @param ... arguments passed to [.Deprecated()].
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' options(warn=1) # Print warning immediately after the call.
 #' f <- function(){
 #'    .Deprecate_once("new_f")
@@ -36,8 +36,7 @@ NULL
   warned <- c()
   function(...){
     me <- sys.call(-1)
-    myname <- as.character(me[[1L]])
-    if(length(myname)>1 && myname[[1L]]=="::") myname <- myname[[3L]]
+    myname <- format(me[[1L]])
     if(! myname%in%warned){
       do.call(".Deprecated", modifyList(list(old=myname),list(...)))
       warned <<- c(warned, myname)
@@ -55,7 +54,7 @@ NULL
 #'   class name of the function to be deprecated.
 #'
 #' @examples
-#' \donttest{
+#' \dontrun{
 #' options(warn=1) # Print warning immediately after the call.
 #' summary.packageDescription <- function(object, ...){
 #'    .Deprecate_method("summary", "packageDescription")
