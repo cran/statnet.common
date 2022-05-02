@@ -1,12 +1,12 @@
-#  File R/misc.utilities.R in package statnet.common, part of the Statnet suite
-#  of packages for network analysis, https://statnet.org .
+#  File R/misc.utilities.R in package statnet.common, part of the
+#  Statnet suite of packages for network analysis, https://statnet.org .
 #
 #  This software is distributed under the GPL-3 license.  It is free,
 #  open source, and has the attribution requirements (GPL Section 7) at
-#  https://statnet.org/attribution
+#  https://statnet.org/attribution .
 #
-#  Copyright 2007-2020 Statnet Commons
-#######################################################################
+#  Copyright 2007-2022 Statnet Commons
+################################################################################
 #' reorder vector v into order determined by matching the names of its elements
 #' to a vector of names
 #' 
@@ -761,6 +761,7 @@ persistEvalQ <- function(expr, retries=NVL(getOption("eval.retries"), 5), before
 #'
 #' @export
 deInf <- function(x, replace=1/.Machine$double.eps){
+  NVL(x) <- integer(0)
   if(tolower(replace) %in% c("maxint","intmax")) replace <- .Machine$integer.max
   ifelse(is.nan(x) | abs(x)<replace, x, sign(x)*replace)
 }

@@ -1,12 +1,12 @@
-#  File R/control.utilities.R in package statnet.common, part of the Statnet suite
-#  of packages for network analysis, https://statnet.org .
+#  File R/control.utilities.R in package statnet.common, part of the
+#  Statnet suite of packages for network analysis, https://statnet.org .
 #
 #  This software is distributed under the GPL-3 license.  It is free,
 #  open source, and has the attribution requirements (GPL Section 7) at
-#  https://statnet.org/attribution
+#  https://statnet.org/attribution .
 #
-#  Copyright 2007-2020 Statnet Commons
-#######################################################################
+#  Copyright 2007-2022 Statnet Commons
+################################################################################
 .autodetect_dep_warn <- local({
   warned <- c()
   function(caller = as.character(ult(sys.calls(),3)[[1L]])){
@@ -401,10 +401,10 @@ as.control.list.list <- function(x, FUN=NULL, unflat=TRUE, ...){
 #' @export
 snctrl <- function(...){
   control <- list(...)
-  if(length(control)){
-    if(any(names(control)=="")) stop("All arguments to ",sQuote("snctrl")," must be named.", call.=FALSE)
-    warning("The following arguments to ",sQuote("snctrl")," are not recognised: ", paste.and(sQuote(names(control))), call.=FALSE, immediate.=TRUE)
-  }
+  # NB: The results of snctrl() will eventually get passed to
+  # as.control.list.list(), which will check for misspelled names, so
+  # we don't need to do that here.
+  if(any(names(control)=="")) stop("All arguments to ",sQuote("snctrl")," must be named.", call.=FALSE)
 
   formal.args<-formals(sys.function())
   formal.args[["..."]] <- NULL
