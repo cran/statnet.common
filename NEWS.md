@@ -1,8 +1,18 @@
+# statnet.common 4.7.0
+
+## New utilities
+
+* An S3 class `term_list` for storing terms extracted from a formula, by `list_rhs.formula()` and others, containing information about each term's sign and environment. Concatenation, indexing, and print methods are implemented.
+
+## Bug fixes
+
+* `list_rhs.formula()` can now handle `NULL` terms on the RHS.
+
 # statnet.common 4.6.0
 
 ## New utilities
 
-* An implementation of Welford's online algorithm for calculating sample mean and variance has been added as a class `Welford` that implements methods `update()`, `mean()`, and `var()` methods (the latter having been made generic and reexported).
+* An implementation of Welford's online algorithm for calculating sample mean and variance has been added as a class `Welford` that implements method `update()` and maintains elements `$n`, `$means`, `$SSDs`, and `$vars`.
 
 ## Bug fixes
 
@@ -37,7 +47,7 @@ respectively.
 
 * A reimplementation of `attr()` is exported, which disables partial matching by default.
 
-# Enhancements to existing utilities
+## Enhancements to existing utilities
 
 * `statnetStartupMessage()` now first looks for a `comment=(affil=...)` for the contributor's affiliation, before using e-mail.
 
@@ -45,7 +55,7 @@ respectively.
 
 * `append_rhs.formula()` now accepts NULL as the first argument, in which case it creates a new formula, and takes an additonal argument `env=`, which is used as this new formula's environment.
 
-# Miscellaneous changes
+## Miscellaneous changes
 
 * `rle` utilities are no longer reexported.
 
