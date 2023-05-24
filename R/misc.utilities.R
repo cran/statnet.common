@@ -42,7 +42,7 @@ vector.namesmatch<-function(v,names,errname=NULL){
        && all(sort(names(v)) == sort(names))){
       namesmatch <- match(names, names(v))
       v <- v[namesmatch]
-    }else stop('Name missmatch in "', errname,'". Specify by position.')
+    }else stop('Name mismatch in "', errname,'". Specify by position.')
   }
   v
 }
@@ -523,11 +523,8 @@ forkTimeout <- function(expr, timeout, unsupported = c("warning","error","messag
     out <- eval(expr, env)
   }else{ # fork() is available on the system.
 
-    ## TODO: The suppressWarnings() are working around a bug in
-    ## current parallel package. They should not be necessary after
-    ## the next R release.
     child <- parallel::mcparallel(eval(expr, env), mc.interactive=NA)
-    out <- suppressWarnings(parallel::mccollect(child, wait=FALSE, timeout=timeout))
+    out <- parallel::mccollect(child, wait=FALSE, timeout=timeout)
 
     if(is.null(out)){ # Timed out with no result: kill.
       tools::pskill(child$pid)
