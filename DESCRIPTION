@@ -1,6 +1,6 @@
 Package: statnet.common
-Version: 4.9.0
-Date: 2023-05-24
+Version: 4.10.0
+Date: 2024-10-01
 Title: Common R Scripts and Utilities Used by the Statnet Project
         Software
 Authors@R: c(
@@ -9,19 +9,19 @@ Authors@R: c(
     person("Chad", "Klumb", role=c("ctb"), email="cklumb@gmail.com", comment=c(affiliation="University of Washington")))
 Description: Non-statistical utilities used by the software developed by the Statnet Project. They may also be of use to others.
 Depends: R (>= 3.5)
-Imports: utils, methods, coda, parallel, tools
+Imports: utils, methods, coda, parallel, tools, Matrix
 BugReports: https://github.com/statnet/statnet.common/issues
 License: GPL-3 + file LICENSE
 URL: https://statnet.org
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2
 Encoding: UTF-8
-Suggests: covr, rlang (>= 1.1.1), MASS, Matrix
+Suggests: covr, rlang (>= 1.1.1), MASS
 NeedsCompilation: yes
-Packaged: 2023-05-24 06:07:22 UTC; pavel
+Packaged: 2024-10-01 14:45:09 UTC; pavel
 Author: Pavel N. Krivitsky [aut, cre] (<https://orcid.org/0000-0002-9101-3362>,
     University of New South Wales),
   Skye Bender-deMoll [ctb],
   Chad Klumb [ctb] (University of Washington)
 Maintainer: Pavel N. Krivitsky <pavel@statnet.org>
 Repository: CRAN
-Date/Publication: 2023-05-24 16:10:02 UTC
+Date/Publication: 2024-10-06 14:20:01 UTC
