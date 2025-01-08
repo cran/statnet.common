@@ -1,6 +1,6 @@
 Package: statnet.common
-Version: 4.10.0
-Date: 2024-10-01
+Version: 4.11.0
+Date: 2024-12-29
 Title: Common R Scripts and Utilities Used by the Statnet Project
         Software
 Authors@R: c(
@@ -13,15 +13,15 @@ Imports: utils, methods, coda, parallel, tools, Matrix
 BugReports: https://github.com/statnet/statnet.common/issues
 License: GPL-3 + file LICENSE
 URL: https://statnet.org
-RoxygenNote: 7.3.2
+RoxygenNote: 7.3.2.9000
 Encoding: UTF-8
 Suggests: covr, rlang (>= 1.1.1), MASS
 NeedsCompilation: yes
-Packaged: 2024-10-01 14:45:09 UTC; pavel
+Packaged: 2024-12-29 04:34:57 UTC; pavel
 Author: Pavel N. Krivitsky [aut, cre] (<https://orcid.org/0000-0002-9101-3362>,
     University of New South Wales),
   Skye Bender-deMoll [ctb],
   Chad Klumb [ctb] (University of Washington)
 Maintainer: Pavel N. Krivitsky <pavel@statnet.org>
 Repository: CRAN
-Date/Publication: 2024-10-06 14:20:01 UTC
+Date/Publication: 2025-01-08 08:40:02 UTC
