@@ -1,11 +1,11 @@
-#  File R/startup.utilities.R in package statnet.common, part of the
-#  Statnet suite of packages for network analysis, https://statnet.org .
+#  File R/startup.utilities.R in package statnet.common, part of the Statnet
+#  suite of packages for network analysis, https://statnet.org .
 #
-#  This software is distributed under the GPL-3 license.  It is free,
-#  open source, and has the attribution requirements (GPL Section 7) at
+#  This software is distributed under the GPL-3 license.  It is free, open
+#  source, and has the attribution requirements (GPL Section 7) at
 #  https://statnet.org/attribution .
 #
-#  Copyright 2007-2024 Statnet Commons
+#  Copyright 2007-2025 Statnet Commons
 ################################################################################
 ## .who.loaded.me <- function(){
 ##   top.call <- sys.calls()[[1L]] # Grab the top-level call.
@@ -60,6 +60,10 @@ statnetStartupMessage <- function(pkgname, friends = c(), nofriends = c()) {
   desc <- utils::packageDescription(pkgname)
 
   paste0("\n", sQuote(desc$Package), " ", desc$Version, " (", desc$Date, "), part of the Statnet Project\n",
+         if(!is.null(desc$RemoteType))
+           sprintf("*  Remote: %s::%s/%s@%s (%s)\n",
+                   desc$RemoteType, desc$RemoteUsername, desc$RemoteRepo,
+                   NVL(desc$RemoteRef, desc$RemoteRelease), substr(desc$RemoteSha, 1, 8)),
          "* ", sQuote(paste0("news(package=\"", desc$Package, "\")")), " for changes since last version\n",
          "* ", sQuote(paste0("citation(\"", desc$Package, "\")"))," for citation information\n",
          "* ", sQuote("https://statnet.org"), " for help, support, and other information\n")

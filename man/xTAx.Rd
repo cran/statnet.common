@@ -7,6 +7,8 @@
 \alias{xTAx_qrsolve}
 \alias{sandwich_solve}
 \alias{xTAx_eigen}
+\alias{sandwich_sginv}
+\alias{sandwich_ginv}
 \title{Common quadratic forms}
 \usage{
 xTAx(x, A)
@@ -20,6 +22,10 @@ xTAx_qrsolve(x, A, tol = 1e-07, ...)
 sandwich_solve(A, B, ...)
 
 xTAx_eigen(x, A, tol = sqrt(.Machine$double.eps), ...)
+
+sandwich_sginv(A, B, ...)
+
+sandwich_ginv(A, B, ...)
 }
 \arguments{
 \item{x}{a vector}
@@ -61,9 +67,10 @@ square matrix and \eqn{A} invertible.
 
 \item \code{xTAx_eigen()}: Evaluate \eqn{x' A^{-1} x} for vector \eqn{x} and
 matrix \eqn{A} (symmetric, nonnegative-definite) via
-eigendecomposition; returns \code{rank} and \code{nullity} as attributes
-just in case subsequent calculations (e.g., hypothesis test
-degrees of freedom) are affected.
+eigendecomposition and confirming that \eqn{x} is in the span of
+\eqn{A} if \eqn{A} is singular; returns \code{rank} and \code{nullity} as
+attributes just in case subsequent calculations (e.g., hypothesis
+test degrees of freedom) are affected.
 
 Decompose \eqn{A = P L P'} for \eqn{L} diagonal matrix of
 eigenvalues and \eqn{P} orthogonal. Then \eqn{A^{-1} = P L^{-1}
