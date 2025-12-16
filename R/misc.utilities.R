@@ -510,7 +510,7 @@ ERRVL <- function(...){
     x <- eval(if(inherits(x, "try-error")) do.call(substitute, list(e, list(.=x))) else e, parent.frame())
     if(!inherits(x, "try-error")) return(x)
   }
-  stop("No non-error expressions passed.")
+  stop(attr(x, "condition"))
 }
 
 #' @rdname ERRVL
@@ -527,9 +527,9 @@ ERRVL <- function(...){
 #' @export
 ERRVL2 <- function(...){
   for(e in eval(substitute(alist(...)))) # Lazy evaluate. (See http://adv-r.had.co.nz/Computing-on-the-language.html .)
-    tryCatch(return(eval(e, parent.frame())),
-             error = function(err){})
-  stop("No non-error expressions passed.")
+    err <- tryCatch(return(eval.parent(e)),
+                    error = function(err) err)
+  stop(err)
 }
 
 #' @rdname ERRVL
@@ -551,14 +551,13 @@ ERRVL2 <- function(...){
 #'
 #' @export
 ERRVL3 <- function(...){
-  x <- NULL
+  err <- NULL
   for(e in eval(substitute(alist(...)))) # Lazy evaluate. (See http://adv-r.had.co.nz/Computing-on-the-language.html .)
-    x <- tryCatch(
-      return(eval(if(!is.null(x)) do.call(substitute, list(e, list(.=x)))
-                  else e,
-                  parent.frame())),
+    err <- tryCatch(
+      return(eval.parent(if (!is.null(err)) do.call(substitute, list(e, list(. = err)))
+                         else e)),
       error = function(err) err)
-  stop("No non-error expressions passed.")
+  stop(err)
 }
 
 #' Optionally test code depending on environment variable.
@@ -1265,3 +1264,145 @@ replace <- function(x, list, values, ...) {
 #' @rdname replace
 #' @export
 `replace<-` <- function(x, list, ..., value) replace(x, list, value, ...)
+
+#' Wrap an object into a singleton list if not already a list
+#'
+#' This function tests whether its first argument is a list according
+#' to the specified criterion; if not, puts it into a list of length 1.
+#'
+#' @param x an object to be wrapped.
+#'
+#' @param test how a string or a function to decide whether an object
+#'   counts as a list; see Details.
+#'
+#' @details `test` can be one of the following \describe{
+#'
+#' \item{`"inherits"`}{use [`inherits`]`(x, "list")`. This will
+#' require the object to have class `list` and is generally the
+#' strictest (i.e., will wrap the most objects).}
+#'
+#' \item{`"list"`}{use [`is.list`]`(x)`. This will treat S3 objects
+#' based on lists as lists.}
+#'
+#' \item{`"vector"`}{use [`is.vector`]`(x)`. This will treat atomic
+#' vectors and [`expression`]s as lists.}
+#'
+#' \item{a function with 1 argument}{call `as.logical(test(x))`; if
+#' `TRUE`, the object is treated as a list; otherwise not.}
+#'
+#' }
+#'
+#' @examples
+#'
+#' data(mtcars)
+#' stopifnot(
+#'   # Atomic vectors don't inherit from lists.
+#'   identical(enlist(1:3), list(1:3)),
+#'   # Atomic vectors are not lists internally.
+#'   identical(enlist(1:3, "list"), list(1:3)),
+#'   # Atomic vectors are a type of R vector.
+#'   identical(enlist(1:3, "vector"), 1:3),
+#'   # Data frames don't inherit from lists.
+#'   identical(enlist(mtcars), list(mtcars)),
+#'   # Data frames are lists internally.
+#'   identical(enlist(mtcars, "list"), mtcars),
+#'   # Data frames are not considered R vectors.
+#'   identical(enlist(mtcars, "vector"), list(mtcars))
+#' )
+#'
+#' # We treat something as a "list" if its first element is odd.
+#' is.odd <- function(x) as.logical(x[1] %% 2)
+#' stopifnot(
+#'   # 1 is a list.
+#'   identical(enlist(1, is.odd), 1),
+#'   # 2 is not.
+#'   identical(enlist(2, is.odd), list(2))
+#' )
+#'
+#' @export
+enlist <- function(x, test = c("inherits", "vector", "list")) {
+  if (is.character(test))
+    test <- switch(match.arg(test),
+                   vector = is.vector,
+                   list = is.list,
+                   inherits = function(x) inherits(x, "list"))
+  else if (!as.logical(is.function(test)))
+    stop(sQuote("test"), " is neither a function nor one of ",
+         paste.and(dQuote(formals(enlist)$test), "or"))
+
+  if (test(x)) x else list(x)
+}
+
+#' Top or bottom `n` elements of a vector
+#'
+#' Return the indices of the top or bottom `abs(n)` elements of a
+#' vector, with several methods for resolving ties.
+#'
+#' @param x a vector on which [rank()] can be evaluated.
+#'
+#' @param n the number of elements to attempt to select; if positive
+#'   top `n` are selected, and if negative bottom `-n`.
+#'
+#' @param tied a string to specify how to handle multiple elements
+#'   tied for `n`'th place: `all` or `none` to include all or none of
+#'   the tied elements, returning a longer or shorter vector than `n`,
+#'   respectively; `given` (the default) to use the order in which the
+#'   elements are found in `x`.
+#'
+#' @return An integer vector of indices on `x`, with an attribute
+#'   `attr(, "tied")` with the indicies of the tied elements (possibly
+#'   empty).
+#'
+#' @examples
+#'
+#' (x <- rep(1:4, 1:4))
+#'
+#' stopifnot(identical(which_top_n(x, 5, "all"), structure(4:10, tied = 4:6)))
+#' stopifnot(identical(which_top_n(x, 5, "none"), structure(7:10, tied = 4:6)))
+#' stopifnot(identical(which_top_n(x, 5), structure(6:10, tied = 4:6)))
+#'
+#' stopifnot(identical(which_top_n(x, -5, "all"), structure(1:6, tied = 4:6)))
+#' stopifnot(identical(which_top_n(x, -5, "none"), structure(1:3, tied = 4:6)))
+#' stopifnot(identical(which_top_n(x, -5), structure(1:5, tied = 4:6)))
+#'
+#' @export
+which_top_n <- function(x, n, tied = c("given", "all", "none")) {
+  tied <- match.arg(tied)
+
+  ordcut <- if (n > 0) function(r) (length(x) + 1 - r) <= n
+            else function(r) r <= -n
+  s1 <- ordcut(rank(x, ties.method = "min"))
+  s2 <- ordcut(rank(x, ties.method = "max"))
+
+  structure(
+    which(switch(tied,
+                 given = ordcut(rank(x, ties.method = "first")),
+                 all = s1 | s2,
+                 none = s1 & s2)),
+    tied = which(s1 != s2)
+  )
+}
+
+#' Split a list or some other `split()`-able object by lengths
+#'
+#' `split_len()` splits an object, such as a list or a data frame,
+#' into subsets with specified lengths.
+#'
+#' @param x an object with a [split()] method.
+#' @param l a vector of lengths of the subsets.
+#'
+#' @return A list with elements of the same type as `x`.
+#'
+#' @examples
+#' x <- 1:10
+#' l <- 1:4
+#'
+#' o <- split_len(x, l)
+#'
+#' stopifnot(identical(lengths(o), l))
+#' stopifnot(identical(unlist(o), x))
+#'
+#' @export
+split_len <- function(x, l) {
+  unname(split(x, factor(rep.int(seq_along(l), l), levels = seq_along(l))))
+}

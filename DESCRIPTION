@@ -1,6 +1,6 @@
 Package: statnet.common
-Version: 4.12.0
-Date: 2025-05-30
+Version: 4.13.0
+Date: 2025-12-16
 Title: Common R Scripts and Utilities Used by the Statnet Project
         Software
 Authors@R: c(
@@ -16,9 +16,9 @@ License: GPL-3 + file LICENSE
 URL: https://statnet.org
 RoxygenNote: 7.3.2.9000
 Encoding: UTF-8
-Suggests: covr, roxygen2, rlang (>= 1.1.1), purrr, MASS
+Suggests: covr, roxygen2, rlang (>= 1.1.1), purrr, testthat, MASS
 NeedsCompilation: yes
-Packaged: 2025-05-29 17:24:24 UTC; pavel
+Packaged: 2025-12-16 11:40:25 UTC; pavel
 Author: Pavel N. Krivitsky [aut, cre] (ORCID:
     <https://orcid.org/0000-0002-9101-3362>, affiliation: University of
     New South Wales),
@@ -28,4 +28,4 @@ Author: Pavel N. Krivitsky [aut, cre] (ORCID:
     <https://orcid.org/0000-0001-7503-852X>)
 Maintainer: Pavel N. Krivitsky <pavel@statnet.org>
 Repository: CRAN
-Date/Publication: 2025-05-30 10:00:02 UTC
+Date/Publication: 2025-12-16 18:10:10 UTC
